@@ -15,6 +15,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import translation
 from django.views.generic import ListView
 from django.views.generic.detail import DetailView
+from django.core import paginator
 
 from menus.utils import set_language_changer
 from parler.views import TranslatableSlugMixin, ViewUrlMixin
@@ -104,6 +105,7 @@ class ArticleDetail(AppConfigMixin, AppHookCheckMixin, PreviewModeMixin,
     day_url_kwarg = 'day'
     slug_url_kwarg = 'slug'
     pk_url_kwarg = 'pk'
+    related_paginate_by = 1
 
     def get(self, request, *args, **kwargs):
         """
@@ -155,6 +157,16 @@ class ArticleDetail(AppConfigMixin, AppHookCheckMixin, PreviewModeMixin,
             self.queryset, self.object)
         context['next_article'] = self.get_next_object(
             self.queryset, self.object)
+        # Custom
+        similar_page = self.request.GET.get("page")
+        similar_articles = Article.objects.filter(related__in=self.object.related.all()).exclude(pk=self.object.pk)
+        similar_paginator = paginator.Paginator(similar_articles, self.related_paginate_by)
+        try:
+            similar_page_obj = similar_paginator.page(similar_page)
+        except (paginator.PageNotAnInteger, paginator.EmptyPage):
+            similar_page_obj = similar_paginator.page(1)
+
+        context["similar_page_obj"] = similar_page_obj
         return context
 
     def get_prev_object(self, queryset=None, object=None):
