@@ -159,7 +159,8 @@ class ArticleDetail(AppConfigMixin, AppHookCheckMixin, PreviewModeMixin,
             self.queryset, self.object)
         # Custom
         if not hasattr(self, 'similar_article_set'):
-            self.similar_article_set = Article.objects.published().filter(categories__in=self.object.categories.all()).exclude(pk=self.object.pk).order_by('-publishing_date')
+            self.similar_article_set = Article.objects.published().filter(categories__in=self.object.categories.all()).exclude(
+                pk=self.object.pk).exclude(categories__translations__slug='price-analysis').order_by('-publishing_date')
         similar_page = self.request.GET.get("page")
         similar_paginator = paginator.Paginator(self.similar_article_set, self.related_paginate_by)
         try:
