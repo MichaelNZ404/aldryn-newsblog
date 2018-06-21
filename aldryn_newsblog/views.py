@@ -158,13 +158,14 @@ class ArticleDetail(AppConfigMixin, AppHookCheckMixin, PreviewModeMixin,
         context['next_article'] = self.get_next_object(
             self.queryset, self.object)
         # Custom
+        if not hasattr(self, 'similar_article_set'):
+            self.similar_article_set = Article.objects.published().filter(categories__in=self.object.categories.all()).exclude(pk=self.object.pk).order_by('-publishing_date')
         similar_page = self.request.GET.get("page")
-        similar_articles = Article.objects.filter(related__in=self.object.related.all()).exclude(pk=self.object.pk)
-        similar_paginator = paginator.Paginator(similar_articles, self.related_paginate_by)
+        similar_paginator = paginator.Paginator(self.similar_article_set, self.related_paginate_by)
         try:
             similar_page_obj = similar_paginator.page(similar_page)
         except (paginator.PageNotAnInteger, paginator.EmptyPage):
-            similar_page_obj = similar_paginator.page(1)
+            similar_page_obj = None
 
         context["similar_page_obj"] = similar_page_obj
         return context
