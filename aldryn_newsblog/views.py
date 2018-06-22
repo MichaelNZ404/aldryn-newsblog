@@ -158,17 +158,22 @@ class ArticleDetail(AppConfigMixin, AppHookCheckMixin, PreviewModeMixin,
         context['next_article'] = self.get_next_object(
             self.queryset, self.object)
         # Custom
-        if not hasattr(self, 'similar_article_set'):
-            self.similar_article_set = Article.objects.published().filter(categories__in=self.object.categories.all()).exclude(
-                pk=self.object.pk).exclude(categories__translations__slug='price-analysis').distinct().order_by('-publishing_date')
+        original_slug = self.request.GET.get("original_slug", None)
+        if not original_slug:
+            original_slug = self.object.slug
+        original = Article.objects.get(translations__slug=original_slug)
+        similar_article_set = Article.objects.published().filter(categories__in=original.categories.all()).exclude(
+            pk=original.pk).exclude(categories__translations__slug='price-analysis').distinct().order_by('-publishing_date')
+
         similar_page = self.request.GET.get("page")
-        similar_paginator = paginator.Paginator(self.similar_article_set, self.related_paginate_by)
+        similar_paginator = paginator.Paginator(similar_article_set, self.related_paginate_by)
         try:
             similar_page_obj = similar_paginator.page(similar_page)
         except (paginator.PageNotAnInteger, paginator.EmptyPage):
             similar_page_obj = None
 
         context["similar_page_obj"] = similar_page_obj
+        context["original_slug"] = original_slug
         return context
 
     def get_prev_object(self, queryset=None, object=None):
