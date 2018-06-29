@@ -61,7 +61,7 @@ class ArticleIndex(get_index_base()):
 
     def get_index_queryset(self, language):
         queryset = super(ArticleIndex, self).get_index_queryset(language)
-        return queryset.published().language(language)
+        return queryset.published().exclude(catagories__translations__slug__contains='price-analysis').language(language)
 
     def get_model(self):
         return Article
