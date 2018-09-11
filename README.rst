@@ -1,4 +1,11 @@
 #################################
+Fork info
+#################################
+An Aldryn Newsblog fork implementing infinite scroll for article requests using JS waypoints. Hitting the bottom of an article page will cause articles to load the next most recent article from within the same categories.
+
+This fork adds pagination to the article page itself, where page index is the index into a set of similar aricles. The loading of additional articles triggers google analytics behavior as expected. 
+
+#################################
 Aldryn News & Blog for django CMS
 #################################
 
